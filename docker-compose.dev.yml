@@ -1,10 +1,14 @@
+version: '3.8'
+
+# Development docker-compose with hot reloading and volume mounts
 services:
-  # FastAPI Backend Service
+  # FastAPI Backend Service (Development)
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: hellomimir-backend
+      target: builder  # Use builder stage for development
+    container_name: hellomimir-backend-dev
     ports:
       - "8000:8000"
     environment:
@@ -15,7 +19,10 @@ services:
       - ARXIV_RATE_LIMIT_SECONDS=${ARXIV_RATE_LIMIT_SECONDS:-3}
       - CRON_SECRET=${CRON_SECRET}
       - CLARIFAI_API_KEY=${CLARIFAI_API_KEY:-}
-      - DEBUG=${DEBUG:-false}
+      - DEBUG=true
+    volumes:
+      - ./backend/app:/app/app:ro
+    command: ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -26,12 +33,13 @@ services:
     networks:
       - hellomimir-network
 
-  # Next.js Frontend Service
+  # Next.js Frontend Service (Development)
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: hellomimir-frontend
+      target: deps  # Use deps stage for development
+    container_name: hellomimir-frontend-dev
     ports:
       - "3000:3000"
     environment:
@@ -39,7 +47,12 @@ services:
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
       - BACKEND_API_URL=http://backend:8000
       - CRON_SECRET=${CRON_SECRET}
-      - NODE_ENV=production
+      - NODE_ENV=development
+    volumes:
+      - ./frontend:/app:cached
+      - /app/node_modules
+      - /app/.next
+    command: ["npm", "run", "dev"]
     depends_on:
       backend:
         condition: service_healthy

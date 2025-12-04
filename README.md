@@ -1,240 +1,214 @@
-# hellomimir
+# hellomimir - Daily Academic Paper Platform
 
-**Learn a paper a day** - A web application that brings you one academic paper per field per day, explained at your reading level.
+**Learn a paper a day** - A web platform that delivers daily academic papers with AI-generated summaries and quizzes at multiple reading levels.
 
-## Overview
+## 🏗️ Architecture
 
-hellomimir fetches papers from arXiv, generates reading-level-appropriate summaries using an LLM, and provides quizzes to test your understanding. Users can choose from fields like AI & Machine Learning, Astrophysics, Mathematics, and more.
+hellomimir uses a **separated frontend + backend architecture**:
 
-### Features
+- **Frontend**: Next.js 14+ (React, TypeScript, Tailwind CSS)
+- **Backend**: Python FastAPI (async, Poetry, Pydantic)
+- **Database**: Supabase PostgreSQL
+- **AI**: OpenAI GPT-4o-mini
+- **Deployment**: Docker + Docker Compose
 
-- **One paper per field per day**: Curated selection from arXiv
-- **Three reading levels**: Grade 5, Middle School, and High School summaries
-- **Interactive quizzes**: Test your understanding with multiple-choice questions
-- **Mobile-first design**: Works great on phones and tablets
-- **Archive access**: Browse previous days' papers
+```
+┌─────────────┐
+│   User      │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────────────────┐
+│  Next.js Frontend       │ ← UI, SSR, Read-only DB access
+│  (Port 3000)            │
+└──────┬──────────────────┘
+       │
+       ▼
+┌─────────────────────────┐
+│  FastAPI Backend        │ ← Business logic, AI, DB writes
+│  (Port 8000)            │
+└──────┬──────────────────┘
+       │
+       ▼
+┌─────────────────────────┐
+│  Supabase PostgreSQL    │ ← Papers, summaries, quizzes
+└─────────────────────────┘
+```
 
-## Tech Stack
+## ✨ Features
 
-- **Framework**: Next.js 15 (App Router) with TypeScript
-- **Styling**: Tailwind CSS
-- **Database**: Supabase (hosted Postgres)
-- **APIs**: arXiv API, OpenAI API
-- **Deployment**: Docker-ready for any container platform
+- **Daily Papers**: Automatically fetch and display new papers from arXiv
+- **Multi-Level Summaries**: AI-generated explanations for 3 reading levels (grade 5, middle school, high school)
+- **Interactive Quizzes**: Test your understanding with multiple-choice questions
+- **Pre-Reading Materials**: Jargon definitions, prerequisites, difficulty assessment
+- **Multiple Fields**: AI/ML, Computer Science, Physics, Mathematics, Statistics
+- **Mobile-First Design**: Works great on phones and tablets
+- **Archive Access**: Browse previous days' papers
 
-## Getting Started
+## 🚀 Quick Start (Docker - Recommended)
 
-### Prerequisites
+See **[docs/DOCKER_QUICKSTART.md](./docs/DOCKER_QUICKSTART.md)** for complete Docker setup guide.
 
-- Node.js 20+
-- npm
-- A Supabase project (free tier works)
-- OpenAI API key
-
-### 1. Clone and Install
+### TL;DR
 
 ```bash
-git clone <your-repo-url>
-cd hellomimir
+# 1. Clone and configure
+git clone <repo>
+cd hellomimir-dev
+cp .env.example .env
+nano .env  # Add your credentials
+
+# 2. Run database migrations in Supabase SQL Editor
+#    - supabase/migrations/001_initial_schema.sql
+#    - supabase/migrations/002_add_full_text_and_prereading.sql
+
+# 3. Build and run with Docker
+docker-compose build
+docker-compose up -d
+
+# 4. Test
+curl http://localhost:8000/health  # Backend
+open http://localhost:3000          # Frontend
+```
+
+## 📚 Documentation
+
+- **[docs/DOCKER_QUICKSTART.md](./docs/DOCKER_QUICKSTART.md)** - Complete Docker setup
+- **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** - System architecture
+- **[docs/MIGRATION_GUIDE.md](./docs/MIGRATION_GUIDE.md)** - Next.js → FastAPI migration
+- **[backend/README.md](./backend/README.md)** - Backend-specific docs
+
+## 🛠️ Development
+
+### Backend (Poetry + Docker)
+
+```bash
+cd backend
+docker-compose up -d  # or poetry install && poetry run uvicorn app.main:app --reload
+```
+
+### Frontend (Next.js)
+
+```bash
+cd frontend
 npm install
-```
-
-### 2. Set Up Environment Variables
-
-Copy the example environment file and fill in your values:
-
-```bash
-cp .env.local.example .env.local
-```
-
-Edit `.env.local`:
-
-```env
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-
-# OpenAI API Key
-OPENAI_API_KEY=your-openai-api-key
-
-# arXiv API Base URL (optional)
-ARXIV_BASE_URL=http://export.arxiv.org/api/query
-
-# Cron endpoint secret
-CRON_SECRET=your-secret-here
-```
-
-### 3. Set Up the Database
-
-Run the SQL migration in your Supabase SQL Editor:
-
-```sql
--- Copy contents from supabase/migrations/001_initial_schema.sql
-```
-
-This creates all tables and seeds the initial fields.
-
-### 4. Run Development Server
-
-```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### 5. Generate Daily Papers
-
-Trigger the cron endpoint to fetch papers and generate summaries:
+### Full Stack
 
 ```bash
-curl -X POST http://localhost:3000/api/cron/daily-papers \
-  -H "x-cron-secret: your-secret-here"
+docker-compose up -d              # Production mode
+docker-compose -f docker-compose.dev.yml up -d  # Development mode
 ```
 
-Or with a specific date:
+## 📦 Project Structure
+
+```
+hellomimir-dev/
+├── backend/                  # Python FastAPI backend
+│   ├── app/                  # Application code
+│   │   ├── api/routes/      # HTTP endpoints
+│   │   ├── services/        # Business logic
+│   │   ├── db/              # Database operations
+│   │   └── core/            # Config, logging
+│   ├── pyproject.toml        # Poetry dependencies
+│   ├── Dockerfile            # Multi-stage build
+│   └── README.md
+├── frontend/                 # Next.js frontend
+│   ├── src/                  # Application code
+│   │   ├── app/             # App router pages
+│   │   ├── components/      # React components
+│   │   └── lib/             # Utilities
+│   ├── public/              # Static assets
+│   ├── package.json
+│   ├── Dockerfile
+│   └── .env.local.example
+├── docs/                     # Documentation
+│   ├── ARCHITECTURE.md
+│   ├── MIGRATION_GUIDE.md
+│   └── DOCKER_QUICKSTART.md
+├── supabase/                 # Database
+│   └── migrations/          # SQL schema migrations
+├── devlog/                   # Development logs
+├── docker-compose.yml        # Full stack (production)
+├── docker-compose.dev.yml    # Full stack (development)
+├── .env.example              # Environment template
+└── README.md                 # This file
+```
+
+## 📝 Current Status: Abstract-Only Mode
+
+**What works:**
+- ✅ Papers fetched from arXiv (metadata + abstract)
+- ✅ Summaries generated from abstract (3 levels)
+- ✅ Quizzes generated from abstract
+
+**What's next:**
+- 🔜 PDF full-text extraction in Python backend
+- 🔜 Pre-reading materials with full text
+- 🔜 Image-based OCR (DeepSeek/Clarifai)
+
+**Why abstract-only?** JavaScript PDF libraries require browser APIs that don't work in Node.js/Next.js. The Python backend is designed to fix this.
+
+## 🧪 Testing
 
 ```bash
-curl -X POST http://localhost:3000/api/cron/daily-papers \
-  -H "x-cron-secret: your-secret-here" \
-  -H "Content-Type: application/json" \
-  -d '{"date": "2024-01-15"}'
+# Backend
+cd backend
+./test_ingestion.sh
+
+# Frontend
+cd frontend
+npm run build
+open http://localhost:3000
 ```
 
-## Docker Deployment
+## 🚀 Deployment
 
-### Build and Run Locally
-
+**Option 1: Docker on VPS**
 ```bash
-# Build the image
-docker build -t hellomimir .
-
-# Run with environment variables
-docker run -p 3000:3000 --env-file .env.local hellomimir
+docker-compose up -d
 ```
 
-### Using Docker Compose
+**Option 2: Separate Services**
+- Frontend: Vercel, Netlify
+- Backend: Railway, Fly.io, DigitalOcean
 
+**Set up daily scheduler** to call:
 ```bash
-# Create .env file with your variables (same format as .env.local)
-# Then run:
-docker compose up --build
+curl -X POST https://your-api.com/internal/papers/daily \
+  -H "X-Cron-Secret: your-secret"
 ```
 
-### Deploying to Production
+## 🛣️ Roadmap
 
-The Docker image works with any container platform:
+- [x] Separate frontend + backend architecture
+- [x] Poetry + Docker setup
+- [x] Clean project structure
+- [ ] PDF extraction in Python
+- [ ] Pre-reading materials
+- [ ] Vector embeddings & semantic search
+- [ ] User accounts
 
-- **Fly.io**: `fly launch` and configure secrets
-- **Render**: Connect your repo and set environment variables
-- **AWS ECS**: Push to ECR and create a service
-- **Google Cloud Run**: Push to GCR and deploy
-
-## Cron Job Setup
-
-The `/api/cron/daily-papers` endpoint should be called once daily to:
-
-1. Fetch new papers from arXiv for each field
-2. Generate summaries at all reading levels
-3. Create quizzes for each paper
-
-### Example Cron Configurations
-
-**GitHub Actions** (`.github/workflows/daily-papers.yml`):
-
-```yaml
-name: Daily Paper Generation
-on:
-  schedule:
-    - cron: '0 6 * * *'  # 6 AM UTC daily
-  workflow_dispatch:
-
-jobs:
-  trigger:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger cron endpoint
-        run: |
-          curl -X POST ${{ secrets.APP_URL }}/api/cron/daily-papers \
-            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
-```
-
-**Supabase Edge Functions**: Create a scheduled function to call the endpoint.
-
-**External cron service**: Use services like cron-job.org, EasyCron, or your cloud provider's scheduler.
-
-## Project Structure
-
-```
-hellomimir/
-├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── api/               # API routes
-│   │   │   ├── fields/        # List fields
-│   │   │   ├── field/[slug]/  # Field-specific endpoints
-│   │   │   └── cron/          # Cron job endpoint
-│   │   ├── fields/            # Field selection page
-│   │   └── field/[slug]/      # Paper viewing pages
-│   ├── components/            # React components
-│   ├── lib/                   # Server-side utilities
-│   │   ├── supabaseClient.ts  # Database operations
-│   │   ├── arxivClient.ts     # arXiv API client
-│   │   ├── llmClient.ts       # OpenAI integration
-│   │   └── dailyPaperService.ts
-│   └── types/                 # TypeScript types
-├── supabase/
-│   └── migrations/            # SQL migrations
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
-```
-
-## API Reference
-
-### `GET /api/fields`
-
-Returns all available fields.
-
-### `GET /api/field/[slug]/today`
-
-Returns today's paper for a field. Supports `?date=YYYY-MM-DD` for specific dates.
-
-### `GET /api/field/[slug]/papers?date=YYYY-MM-DD`
-
-Returns the paper for a specific date.
-
-### `GET /api/field/[slug]/archive`
-
-Returns all past papers for a field.
-
-### `POST /api/cron/daily-papers`
-
-Triggers paper generation for all fields. Requires `x-cron-secret` header.
-
-## Database Schema
-
-- **fields**: User-facing categories with arXiv query mappings
-- **papers**: Unique arXiv papers
-- **daily_papers**: One paper per field per date
-- **paper_summaries**: Reading-level summaries
-- **paper_quizzes**: Multiple-choice quizzes
-
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (server-side only) |
-| `OPENAI_API_KEY` | Yes | OpenAI API key for generating summaries |
-| `ARXIV_BASE_URL` | No | arXiv API base URL (default: http://export.arxiv.org/api/query) |
-| `CRON_SECRET` | Yes | Secret for authenticating cron requests |
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create feature branch
 3. Make your changes
-4. Submit a pull request
+4. Submit PR
 
-## License
+## 📄 License
 
 MIT
+
+## 🙏 Acknowledgments
+
+- arXiv for open access papers
+- OpenAI for GPT-4o-mini
+- Supabase for database
+- FastAPI & Next.js communities
+
+---
+
+Built with ❤️ for making academic papers accessible to everyone.

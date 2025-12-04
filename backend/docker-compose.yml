@@ -1,0 +1,30 @@
+version: '3.8'
+
+# Standalone backend-only docker-compose
+# For running just the backend service independently
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hellomimir-backend-standalone
+    ports:
+      - "8000:8000"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ARXIV_BASE_URL=${ARXIV_BASE_URL:-http://export.arxiv.org/api/query}
+      - ARXIV_RATE_LIMIT_SECONDS=${ARXIV_RATE_LIMIT_SECONDS:-3}
+      - CRON_SECRET=${CRON_SECRET}
+      - CLARIFAI_API_KEY=${CLARIFAI_API_KEY:-}
+      - DEBUG=${DEBUG:-false}
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
