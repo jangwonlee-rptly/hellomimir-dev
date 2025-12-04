@@ -101,46 +101,66 @@ export default function Quiz({ quiz, fieldSlug, date, arxivId }: QuizProps) {
 
   if (!isOpen) {
     return (
-      <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Test Your Understanding
-            </h3>
-            <p className="text-gray-600 text-sm mt-1">
-              {quiz.questions.length} multiple choice questions
-            </p>
-            {previousResult && (
-              <p className="text-primary-600 text-sm mt-2">
-                Previous score: {previousResult.score}/
-                {previousResult.totalQuestions}
+      <div className="bg-gradient-to-br from-accent-50 to-primary-50 rounded-3xl shadow-lg border-2 border-accent-200 overflow-hidden">
+        <div className="h-2 bg-gradient-to-r from-accent-400 to-primary-500" />
+        <div className="p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div>
+              <h3 className="font-display font-black text-2xl sm:text-3xl text-neutral-900 mb-2">
+                Test Your Understanding
+              </h3>
+              <p className="text-neutral-600 text-base">
+                {quiz.questions.length} multiple choice questions
               </p>
-            )}
+              {previousResult && (
+                <div className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-primary-100 border border-primary-300 rounded-full">
+                  <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-primary-700 font-semibold text-sm">
+                    Previous score: {previousResult.score}/{previousResult.totalQuestions}
+                  </span>
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => setIsOpen(true)}
+              className="group inline-flex items-center justify-center gap-3 bg-primary-600 text-white px-8 py-4 rounded-2xl text-lg font-bold hover:bg-primary-700 transition-all hover:scale-105 hover:shadow-xl"
+            >
+              {previousResult ? "Retake Quiz" : "Take the Quiz"}
+              <svg
+                className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </button>
           </div>
-          <button
-            onClick={() => setIsOpen(true)}
-            className="bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors"
-          >
-            {previousResult ? "Retake Quiz" : "Take the Quiz"}
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-3xl border-2 border-neutral-200 shadow-xl overflow-hidden">
       {/* Quiz header */}
-      <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+      <div className="bg-gradient-to-r from-primary-500 to-accent-500 px-6 py-5 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Quiz</h3>
-          <p className="text-gray-600 text-sm">
+          <h3 className="font-display font-black text-2xl text-white">Quiz Time!</h3>
+          <p className="text-primary-50 text-sm font-medium">
             Question {currentQuestion + 1} of {quiz.questions.length}
           </p>
         </div>
         <button
           onClick={() => setIsOpen(false)}
-          className="text-gray-500 hover:text-gray-700"
+          className="text-white hover:text-primary-100 transition-colors p-2 hover:bg-white/20 rounded-xl"
         >
           <svg
             className="w-6 h-6"
@@ -151,7 +171,7 @@ export default function Quiz({ quiz, fieldSlug, date, arxivId }: QuizProps) {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={2.5}
               d="M6 18L18 6M6 6l12 12"
             />
           </svg>
@@ -159,22 +179,22 @@ export default function Quiz({ quiz, fieldSlug, date, arxivId }: QuizProps) {
       </div>
 
       {/* Question navigation dots */}
-      <div className="px-6 py-3 border-b border-gray-200 flex gap-2 overflow-x-auto">
+      <div className="px-6 py-4 border-b-2 border-neutral-100 flex gap-2 overflow-x-auto bg-neutral-50">
         {quiz.questions.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentQuestion(index)}
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors flex-shrink-0 ${
+            className={`w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-bold transition-all flex-shrink-0 ${
               currentQuestion === index
-                ? "bg-primary-600 text-white"
+                ? "bg-primary-600 text-white shadow-lg scale-110"
                 : selectedAnswers[index] !== null
                 ? isSubmitted
                   ? selectedAnswers[index] ===
                     quiz.questions[index].correct_index
-                    ? "bg-green-100 text-green-700 border border-green-300"
-                    : "bg-red-100 text-red-700 border border-red-300"
-                  : "bg-primary-100 text-primary-700"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-green-500 text-white border-2 border-green-600"
+                    : "bg-red-500 text-white border-2 border-red-600"
+                  : "bg-primary-100 text-primary-700 border-2 border-primary-300"
+                : "bg-white text-neutral-600 hover:bg-neutral-100 border-2 border-neutral-300"
             }`}
           >
             {index + 1}
@@ -183,8 +203,8 @@ export default function Quiz({ quiz, fieldSlug, date, arxivId }: QuizProps) {
       </div>
 
       {/* Current question */}
-      <div className="p-6">
-        <p className="text-gray-900 font-medium mb-4">
+      <div className="p-6 sm:p-8">
+        <p className="font-display font-bold text-xl sm:text-2xl text-neutral-900 mb-6 leading-snug">
           {quiz.questions[currentQuestion].question}
         </p>
 
@@ -197,22 +217,22 @@ export default function Quiz({ quiz, fieldSlug, date, arxivId }: QuizProps) {
               quiz.questions[currentQuestion].correct_index;
 
             let optionClasses =
-              "w-full text-left p-4 rounded-lg border-2 transition-colors ";
+              "w-full text-left p-5 rounded-2xl border-2 transition-all font-medium ";
 
             if (isSubmitted) {
               if (isCorrect) {
-                optionClasses += "border-green-500 bg-green-50 text-green-900";
+                optionClasses += "border-green-500 bg-green-50 text-green-900 shadow-lg";
               } else if (isSelected && !isCorrect) {
-                optionClasses += "border-red-500 bg-red-50 text-red-900";
+                optionClasses += "border-red-500 bg-red-50 text-red-900 shadow-lg";
               } else {
-                optionClasses += "border-gray-200 text-gray-500";
+                optionClasses += "border-neutral-200 text-neutral-500 opacity-60";
               }
             } else {
               if (isSelected) {
-                optionClasses += "border-primary-500 bg-primary-50";
+                optionClasses += "border-primary-500 bg-primary-50 text-primary-900 shadow-lg scale-[1.02]";
               } else {
                 optionClasses +=
-                  "border-gray-200 hover:border-gray-300 hover:bg-gray-50";
+                  "border-neutral-300 hover:border-primary-300 hover:bg-primary-50/50 hover:shadow-md";
               }
             }
 
@@ -225,11 +245,29 @@ export default function Quiz({ quiz, fieldSlug, date, arxivId }: QuizProps) {
                 disabled={isSubmitted}
                 className={optionClasses}
               >
-                <span className="flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full border flex items-center justify-center flex-shrink-0 text-sm">
+                <span className="flex items-start gap-4">
+                  <span className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center flex-shrink-0 text-sm font-bold ${
+                    isSubmitted && isCorrect
+                      ? "bg-green-500 text-white border-green-600"
+                      : isSubmitted && isSelected && !isCorrect
+                      ? "bg-red-500 text-white border-red-600"
+                      : isSelected
+                      ? "bg-primary-600 text-white border-primary-700"
+                      : "border-neutral-400"
+                  }`}>
                     {String.fromCharCode(65 + optionIndex)}
                   </span>
-                  <span>{option}</span>
+                  <span className="flex-1 text-base">{option}</span>
+                  {isSubmitted && isCorrect && (
+                    <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                  {isSubmitted && isSelected && !isCorrect && (
+                    <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
                 </span>
               </button>
             );
@@ -237,23 +275,33 @@ export default function Quiz({ quiz, fieldSlug, date, arxivId }: QuizProps) {
         </div>
 
         {isSubmitted && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-blue-900 text-sm">
-              <strong>Explanation:</strong>{" "}
-              {quiz.questions[currentQuestion].explanation}
-            </p>
+          <div className="mt-6 p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border-2 border-blue-200">
+            <div className="flex items-start gap-3">
+              <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="font-bold text-blue-900 mb-1">Explanation</p>
+                <p className="text-blue-800 text-sm leading-relaxed">
+                  {quiz.questions[currentQuestion].explanation}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
       {/* Navigation and submit */}
-      <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-        <div className="flex gap-2">
+      <div className="px-6 py-5 border-t-2 border-neutral-100 bg-neutral-50 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <div className="flex gap-3">
           <button
             onClick={() => setCurrentQuestion((c) => Math.max(0, c - 1))}
             disabled={currentQuestion === 0}
-            className="px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group flex items-center gap-2 px-5 py-3 bg-white text-neutral-700 rounded-xl font-semibold hover:bg-neutral-100 disabled:opacity-40 disabled:cursor-not-allowed border-2 border-neutral-300 hover:border-neutral-400 transition-all"
           >
+            <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            </svg>
             Previous
           </button>
           <button
@@ -263,31 +311,45 @@ export default function Quiz({ quiz, fieldSlug, date, arxivId }: QuizProps) {
               )
             }
             disabled={currentQuestion === quiz.questions.length - 1}
-            className="px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group flex items-center gap-2 px-5 py-3 bg-white text-neutral-700 rounded-xl font-semibold hover:bg-neutral-100 disabled:opacity-40 disabled:cursor-not-allowed border-2 border-neutral-300 hover:border-neutral-400 transition-all"
           >
             Next
+            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
 
         {isSubmitted ? (
-          <div className="flex items-center gap-4">
-            <span className="text-lg font-semibold text-gray-900">
-              Score: {previousResult?.score}/{previousResult?.totalQuestions}
-            </span>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="inline-flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-primary-100 to-accent-100 border-2 border-primary-300 rounded-2xl">
+              <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="font-display font-black text-xl text-neutral-900">
+                Score: {previousResult?.score}/{previousResult?.totalQuestions}
+              </span>
+            </div>
             <button
               onClick={handleRetake}
-              className="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+              className="group inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-primary-700 transition-all hover:scale-105 hover:shadow-lg"
             >
               Retake Quiz
+              <svg className="w-5 h-5 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
             </button>
           </div>
         ) : (
           <button
             onClick={handleSubmit}
             disabled={!allAnswered}
-            className="bg-primary-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group inline-flex items-center justify-center gap-2 bg-primary-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 hover:shadow-xl"
           >
             Submit Quiz
+            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </button>
         )}
       </div>
