@@ -119,12 +119,11 @@ class SupabaseClient:
             response = (
                 self.client.table("daily_papers")
                 .insert({"date": date, "field_id": str(field_id), "paper_id": str(paper_id)})
-                .select()
-                .single()
                 .execute()
             )
             logger.info(f"Created daily paper for {date}, field {field_id}")
-            return DailyPaper(**response.data)
+            # Supabase insert returns the inserted data in response.data
+            return DailyPaper(**response.data[0]) if response.data else None
         except Exception as e:
             logger.error(f"Error creating daily paper: {e}")
             raise
