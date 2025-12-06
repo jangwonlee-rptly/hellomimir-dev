@@ -188,3 +188,141 @@ class PrereadingResult(BaseModel):
     difficulty_level: DifficultyLevel
     estimated_read_time_minutes: int
     key_concepts: List[str]
+
+
+# ========== User Profile Models ==========
+
+
+class UserProfile(BaseModel):
+    """User profile with preferences"""
+
+    id: UUID
+    preferred_field_id: Optional[UUID] = None
+    display_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class UserProfileUpdate(BaseModel):
+    """Request to update user profile"""
+
+    preferred_field_id: Optional[UUID] = None
+    display_name: Optional[str] = None
+
+
+class UserViewedPaper(BaseModel):
+    """Record of user viewing a paper"""
+
+    id: UUID
+    user_id: UUID
+    paper_id: UUID
+    field_id: Optional[UUID] = None
+    viewed_at: datetime
+
+
+class UserViewedPaperCreate(BaseModel):
+    """Request to record paper view"""
+
+    paper_id: UUID
+    field_id: Optional[UUID] = None
+
+
+class QuizScoreSubmission(BaseModel):
+    """Request to submit quiz score"""
+
+    paper_id: UUID
+    field_id: UUID
+    score: int = Field(ge=0)
+    total_questions: int = Field(gt=0)
+    answers: List[int]
+
+
+class UserQuizScore(BaseModel):
+    """User's quiz score record"""
+
+    id: UUID
+    user_id: UUID
+    paper_id: UUID
+    field_id: UUID
+    score: int
+    total_questions: int
+    answers_json: List[int]
+    completed_at: datetime
+
+
+class UserPaperNote(BaseModel):
+    """User's note on a paper"""
+
+    id: UUID
+    user_id: UUID
+    paper_id: UUID
+    note_text: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class UserPaperNoteCreate(BaseModel):
+    """Request to create/update note"""
+
+    note_text: str
+
+
+class UserFavoritePaper(BaseModel):
+    """User's favorited paper"""
+
+    id: UUID
+    user_id: UUID
+    paper_id: UUID
+    created_at: datetime
+
+
+# ========== User Profile Response Models ==========
+
+
+class UserProfileWithField(BaseModel):
+    """User profile with preferred field details"""
+
+    id: UUID
+    preferred_field_id: Optional[UUID] = None
+    preferred_field: Optional[AcademicField] = None
+    display_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ViewedPaperWithDetails(BaseModel):
+    """Viewed paper with paper details"""
+
+    id: UUID
+    paper_id: UUID
+    paper_title: str
+    paper_arxiv_id: str
+    field_id: Optional[UUID] = None
+    field_name: Optional[str] = None
+    viewed_at: datetime
+
+
+class FavoritePaperWithDetails(BaseModel):
+    """Favorite paper with paper details"""
+
+    id: UUID
+    paper_id: UUID
+    paper_title: str
+    paper_arxiv_id: str
+    created_at: datetime
+
+
+class QuizScoreWithDetails(BaseModel):
+    """Quiz score with paper/field details"""
+
+    id: UUID
+    paper_id: UUID
+    paper_title: str
+    paper_arxiv_id: str
+    field_id: UUID
+    field_name: str
+    score: int
+    total_questions: int
+    completed_at: datetime

@@ -1,0 +1,38 @@
+[2025-12-06 22:51] Fix frontend timeout for daily paper cron job
+File: devlog/2512062251.txt
+
+== What we worked on ==
+- Debugging and fixing a timeout error when triggering the daily paper cron job from the admin panel.
+
+== Changes made ==
+- frontend/src/app/api/cron/daily-papers/route.ts:
+  - Added BACKEND_TIMEOUT_MS constant (10 minutes) for long-running paper processing
+  - Added AbortController with extended timeout to POST handler fetch call
+  - Added AbortController with extended timeout to GET handler fetch call
+  - Added proper timeout cleanup with clearTimeout after successful fetch
+
+== Problems encountered ==
+- When triggering the daily paper cron job via admin panel, the frontend returned an error:
+  "Error forwarding to backend: TypeError: fetch failed"
+  with cause: "HeadersTimeoutError: Headers Timeout Error" (code: UND_ERR_HEADERS_TIMEOUT)
+- The backend successfully processed all papers (5 success, 0 failed) but the frontend
+  couldn't receive the response.
+
+== How we tried to solve it ==
+- Examined the error message which pointed to a headers timeout issue
+- Reviewed the daily-papers route.ts file to check timeout configuration
+- Found that fetch calls had no timeout configured, relying on Node.js defaults (~30s)
+
+== How we solved it ==
+- Root cause: Node.js fetch has a default header timeout of approximately 30 seconds.
+  The paper processing operation takes longer than this, causing the frontend to
+  abort the request before receiving response headers from the backend.
+- Fix: Added AbortController with a 10-minute timeout to both POST and GET handlers.
+  This allows sufficient time for paper processing while still having a reasonable
+  upper bound to prevent indefinitely hanging requests.
+- The fix requires rebuilding the frontend container: docker-compose up -d --build frontend
+
+== Next steps / TODOs ==
+- Rebuild frontend container to apply the fix
+- Test the daily paper cron job again from admin panel to verify timeout fix works
+- Consider adding progress feedback mechanism for long-running operations in the future

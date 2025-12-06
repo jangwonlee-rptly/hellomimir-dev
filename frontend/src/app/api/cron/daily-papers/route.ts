@@ -24,6 +24,9 @@ function getBackendUrl(): string {
   return `${backendUrl}/internal/papers/daily`;
 }
 
+// Timeout for long-running paper processing (10 minutes)
+const BACKEND_TIMEOUT_MS = 10 * 60 * 1000;
+
 export async function POST(request: NextRequest) {
   // Verify authentication
   if (!verifyCronSecret(request)) {
@@ -41,8 +44,11 @@ export async function POST(request: NextRequest) {
 
     console.log(`Forwarding daily paper request to backend...`);
 
-    // Forward request to FastAPI backend
+    // Forward request to FastAPI backend with extended timeout
     const backendUrl = getBackendUrl();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), BACKEND_TIMEOUT_MS);
+
     const response = await fetch(backendUrl, {
       method: "POST",
       headers: {
@@ -50,7 +56,10 @@ export async function POST(request: NextRequest) {
         "X-Cron-Secret": process.env.CRON_SECRET || "",
       },
       body: JSON.stringify(body),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     const data = await response.json();
 
@@ -84,8 +93,11 @@ export async function GET(request: NextRequest) {
 
     console.log(`Forwarding daily paper request to backend (GET)...`);
 
-    // Forward request to FastAPI backend
+    // Forward request to FastAPI backend with extended timeout
     const backendUrl = getBackendUrl();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), BACKEND_TIMEOUT_MS);
+
     const response = await fetch(backendUrl, {
       method: "POST",
       headers: {
@@ -93,7 +105,10 @@ export async function GET(request: NextRequest) {
         "X-Cron-Secret": process.env.CRON_SECRET || "",
       },
       body: JSON.stringify(date ? { date } : {}),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     const data = await response.json();
 

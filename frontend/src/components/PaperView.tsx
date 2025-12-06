@@ -5,6 +5,8 @@ import type { DailyPaperWithDetails, ReadingLevel } from "@/types";
 import ReadingLevelTabs from "./ReadingLevelTabs";
 import Quiz from "./Quiz";
 import { PreReadingGuide } from "./PreReadingGuide";
+import { FavoriteButton } from "./FavoriteButton";
+import { PaperNotes } from "./PaperNotes";
 
 interface PaperViewProps {
   data: DailyPaperWithDetails;
@@ -55,9 +57,12 @@ export default function PaperView({ data }: PaperViewProps) {
       <div className="bg-white rounded-3xl shadow-xl border-2 border-neutral-200 overflow-hidden">
         <div className="h-2 bg-gradient-to-r from-primary-400 to-accent-500" />
         <div className="p-6 sm:p-8">
-          <h2 className="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-neutral-900 leading-tight mb-4">
-            {paper.title}
-          </h2>
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <h2 className="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-neutral-900 leading-tight">
+              {paper.title}
+            </h2>
+            <FavoriteButton paperId={paper.id} />
+          </div>
           <div className="flex flex-wrap items-center gap-4 text-neutral-600 mb-6">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,6 +175,9 @@ export default function PaperView({ data }: PaperViewProps) {
         </div>
       </div>
 
+      {/* User notes */}
+      <PaperNotes paperId={paper.id} />
+
       {/* Quiz */}
       {quiz && (
         <Quiz
@@ -177,6 +185,8 @@ export default function PaperView({ data }: PaperViewProps) {
           fieldSlug={field.slug}
           date={date}
           arxivId={paper.arxiv_id}
+          paperId={paper.id}
+          fieldId={field.id}
         />
       )}
     </div>

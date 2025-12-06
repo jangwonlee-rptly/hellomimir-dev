@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.logging import setup_logging, get_logger
 from app.core.config import settings
-from app.api.routes import health, papers
+from app.api.routes import health, papers, users
 from app import __version__
 
 # Setup logging
@@ -32,6 +32,7 @@ app.add_middleware(
 # Include routers
 app.include_router(health.router, tags=["Health"])
 app.include_router(papers.router, tags=["Papers"])
+app.include_router(users.router)
 
 
 @app.on_event("startup")

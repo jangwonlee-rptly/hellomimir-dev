@@ -1,0 +1,63 @@
+[2025-12-06 23:28] Add user profiles feature with Supabase Auth
+File: devlog/2512062328.txt
+
+== What we worked on ==
+- Implemented a complete user authentication and profiles system using Supabase Auth
+- Added Google OAuth and email/password authentication
+- Created user profile data storage for: preferred category, viewed papers, quiz scores, paper notes, and favorite papers
+- Made quiz-taking require user login (breaking change from localStorage approach)
+
+== Changes made ==
+- supabase/migrations/003_add_user_profiles.sql:
+  - Created 5 new tables: user_profiles, user_viewed_papers, user_quiz_scores, user_paper_notes, user_favorite_papers
+  - Added auto-create profile trigger on user signup
+  - Implemented Row Level Security (RLS) policies for all user tables
+  - Added service role policies for backend access
+
+- Backend (FastAPI):
+  - backend/pyproject.toml: Added python-jose[cryptography] dependency for JWT verification
+  - backend/app/core/config.py: Added supabase_jwt_secret setting
+  - backend/app/core/auth.py: Created JWT authentication middleware with get_current_user and get_optional_user
+  - backend/app/db/models.py: Added 12 new Pydantic models for user profiles, quiz scores, notes, favorites
+  - backend/app/services/user_service.py: Created complete service layer for user operations
+  - backend/app/api/routes/users.py: Added 14 API endpoints for user profile management
+  - backend/app/main.py: Registered new users router
+
+- Frontend (Next.js):
+  - frontend/package.json: Added @supabase/ssr dependency
+  - frontend/src/lib/supabaseClient.ts: Added getAuthClient() for browser-side auth
+  - frontend/src/lib/supabaseServer.ts: Created server-side Supabase client for SSR
+  - frontend/src/types/index.ts: Added 8 new TypeScript types for user features
+  - frontend/src/contexts/AuthContext.tsx: Created auth context with session management
+  - frontend/src/app/layout.tsx: Wrapped app with AuthProvider
+  - frontend/src/app/login/page.tsx: Login page with Google OAuth + email/password
+  - frontend/src/app/signup/page.tsx: Signup page with email confirmation flow
+  - frontend/src/app/auth/callback/route.ts: OAuth callback handler
+  - frontend/src/app/profile/page.tsx: User profile page with preferences, favorites, quiz history
+  - frontend/src/components/Header.tsx: Added user menu with avatar, dropdown, sign in/out
+  - frontend/src/components/Quiz.tsx: Refactored to require auth, submit scores to backend
+  - frontend/src/components/FavoriteButton.tsx: Heart toggle for favoriting papers
+  - frontend/src/components/PaperNotes.tsx: Expandable notes section with auto-save
+  - frontend/src/components/PaperView.tsx: Integrated FavoriteButton and PaperNotes
+  - frontend/src/app/api/users/me/*: Created API routes to proxy user requests to backend
+
+- Configuration:
+  - .env.example: Added SUPABASE_JWT_SECRET documentation
+
+== Problems encountered ==
+- None significant - this was a planned feature implementation
+
+== How we solved it / Current status ==
+- Successfully implemented the full user profiles feature
+- All code is written and ready for testing
+- Breaking change: Quizzes now require login (localStorage quiz results will not be migrated)
+
+== Next steps / TODOs ==
+- Run the database migration in Supabase SQL editor (003_add_user_profiles.sql)
+- Install new dependencies: `cd backend && poetry install` and `cd frontend && npm install`
+- Get JWT secret from Supabase Dashboard > Settings > API > JWT Settings
+- Add SUPABASE_JWT_SECRET to backend .env file
+- Enable Google OAuth in Supabase Dashboard > Authentication > Providers
+- Configure Google OAuth redirect URL in Google Cloud Console
+- Rebuild Docker containers to apply changes
+- Test the complete auth flow (signup, login, profile, quiz, favorites, notes)

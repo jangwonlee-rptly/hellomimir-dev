@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     # Cron Secret for endpoint authentication
     cron_secret: Optional[str] = None
 
+    # Supabase JWT Secret for verifying auth tokens
+    supabase_jwt_secret: Optional[str] = None
+
     # Optional: Clarifai for future OCR
     clarifai_api_key: Optional[str] = None
 

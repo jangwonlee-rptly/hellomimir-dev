@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for FastAPI backend using Poetry
 
 # Stage 1: Builder
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # Set environment variables for Poetry
 ENV POETRY_VERSION=1.7.1 \
@@ -33,7 +33,7 @@ RUN poetry lock --no-update && \
     rm -rf $POETRY_CACHE_DIR
 
 # Stage 2: Runtime
-FROM python:3.11-slim as runtime
+FROM python:3.11-slim AS runtime
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \

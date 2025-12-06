@@ -1,0 +1,78 @@
+[2025-12-07 00:26] Fix Docker build errors and configure Google OAuth for user authentication
+File: devlog/2512070026.txt
+
+== What we worked on ==
+- Fixed multiple Docker build errors for the frontend container
+- Resolved TypeScript and ESLint errors preventing production build
+- Configured Google OAuth authentication flow with Supabase
+
+== Changes made ==
+- backend/Dockerfile:
+  - Fixed FromAsCasing warnings by changing "as builder" to "AS builder" (line 4)
+  - Changed "as runtime" to "AS runtime" (line 36)
+
+- frontend/package-lock.json:
+  - Ran npm install to sync lock file with @supabase/ssr dependency
+
+- frontend/src/lib/supabaseClient.ts:
+  - Changed browserClient type from SupabaseClient to ReturnType<typeof createBrowserClient>
+  - Removed explicit return type on getAuthClient() to let TypeScript infer it
+
+- frontend/src/contexts/AuthContext.tsx:
+  - Added full Field type properties to the profile data cast (description, arxiv_query, created_at)
+  - Wrapped fetchProfile in useCallback to fix useEffect dependency warning
+  - Used useRef for supabase client to prevent recreation on each render
+  - Added origin.replace("0.0.0.0", "localhost") to fix Docker hostname redirect issue
+
+- frontend/src/app/profile/page.tsx:
+  - Replaced <img> with Next.js <Image> component for avatar (with unoptimized prop)
+
+- frontend/src/components/Header.tsx:
+  - Replaced <img> with Next.js <Image> component for avatar (with unoptimized prop)
+
+- frontend/src/app/login/page.tsx:
+  - Wrapped useSearchParams() usage in Suspense boundary to fix prerendering error
+  - Extracted LoginForm component with LoginFormFallback skeleton
+
+- frontend/src/app/signup/page.tsx:
+  - Wrapped useSearchParams() usage in Suspense boundary to fix prerendering error
+  - Extracted SignupForm component with SignupFormFallback skeleton
+
+== Problems encountered ==
+- Problem 1: npm ci failing due to missing @supabase/ssr in lock file
+- Problem 2: Type mismatch between @supabase/ssr createBrowserClient and @supabase/supabase-js SupabaseClient
+- Problem 3: Property 'fields' does not exist on type 'never' in AuthContext
+- Problem 4: Field type missing properties (description, arxiv_query, created_at)
+- Problem 5: useEffect missing dependencies warning for fetchProfile and supabase.auth
+- Problem 6: ESLint warnings for using <img> instead of Next.js <Image>
+- Problem 7: useSearchParams() requires Suspense boundary in Next.js 13+ for static prerendering
+- Problem 8: Google OAuth redirecting to 0.0.0.0:3000 instead of localhost:3000
+- Problem 9: Google OAuth "redirect_uri_mismatch" error
+
+== How we tried to solve it ==
+- For npm ci: Ran npm install to regenerate lock file
+- For type mismatch: Used ReturnType<typeof createBrowserClient> instead of explicit SupabaseClient type
+- For 'never' type: Added explicit type cast for Supabase query result
+- For missing Field properties: Extended the cast to include all Field interface properties
+- For useEffect deps: Used useCallback and useRef to create stable references
+- For <img> warnings: Replaced with Next.js Image component using unoptimized prop (for external OAuth avatar URLs)
+- For Suspense: Extracted form components and wrapped in <Suspense> with fallback skeletons
+- For 0.0.0.0 redirect: Added string replace to convert 0.0.0.0 to localhost in redirect URLs
+
+== How we solved it / Current status ==
+- All Docker build errors resolved - frontend builds successfully
+- Google OAuth partially working:
+  - User can authenticate and account is created in Supabase
+  - Session works after page refresh
+  - Initial redirect issue (0.0.0.0) fixed with code workaround
+  - "redirect_uri_mismatch" error requires Google Cloud Console configuration
+
+== Next steps / TODOs ==
+- In Google Cloud Console > OAuth 2.0 Client IDs, add Supabase's callback URL to Authorized redirect URIs:
+  - Format: https://<project-ref>.supabase.co/auth/v1/callback
+  - Find this URL in Supabase Dashboard > Authentication > Providers > Google
+- Ensure Supabase Dashboard > Authentication > URL Configuration has:
+  - Site URL: http://localhost:3000
+  - Redirect URLs: http://localhost:3000/auth/callback
+- Test complete OAuth flow after configuration
+- Test email/password signup flow
